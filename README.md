@@ -10,3 +10,52 @@ A aplicaÃ§Ã£o Ã© exposta usando a porta 8080
 Para criar a imagem docker, seguir conforme o exemplo abaixo
 
 `docker build -t <account>/<repository>:<version> -f Dockerfile src/`
+
+### Deploy no K8S
+
+Para realizar o deploy nessecitamos de um cluster kubernetes, para este exemplo, é utilizado cluster local.
+
+Os passos abaixos utilizam as seguintes ferramentas:
+
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [k3d ](https://k3d.io)
+
+As instruções de instalação e uso encontram-se nos respectivos sites.
+
+#### Criando cluster
+
+Para criar o cluster K8S, executar o comando abaixo:
+
+`k3d cluster create mycluster -p "80:30000@loadbalancer"`
+
+O comando acima criará cluster com um nó, realizando bind da porta 80 do loadbalancer com a porta 30000 a ser exposta pelo serviço.
+
+Para visualizar o cluster podem ser executados os comandos abaixo:
+
+`k3d cluster list`
+
+ou
+
+`kubectl get nodes`
+
+#### Realizando o deploy
+
+Para deploy no kubernetes, fora criado o manifesto `manifests/deployment.yaml`, sendo utilizado no `kubectl` conforme exemplo abaixo:
+
+`kubectl apply -f manifests/deployment.yaml`
+
+Acompanhar a criação dos `pods` com o comando
+
+`kubectl get pods`
+
+até que ele esteja com estado ´RUNNING`, como a linha abaixo:
+
+```
+> kubectl get pod
+NAME                           READY   STATUS    RESTARTS   AGE
+convert-app-67b78fb586-gwf96   1/1     Running   0          4m25s
+```
+
+#### Testando
+
+Acessar o endereço `http://localhost` (se modificado o bind do loadbalancer do cluster para porta diferente da 80, especificar conforme exemplo: `http://localhost:<port>`).
